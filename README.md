@@ -1,12 +1,12 @@
-# Meriem_Foukalne
-Détection des captages en dégradation nitrates en Haute-Marne et lien avec l’assolement (PostgreSQL/PostGIS, R, tests non paramétriques)
+# 📌 Détection des captages en dégradation nitrates et ciblage des actions préventives en Haute-Marne
+
 ## Business Problem
 
 Chaque année, les maîtres d'ouvrage chargés de la distribution d'eau potable reçoivent des alertes de l'ARS signalant des dépassements de la norme de 50 mg/L en nitrates, rendant l'eau impropre à la consommation.
 
-Ces dépassements entraînent des coûts non prévus : distribution d'eau en bouteille aux usagers, recherche de ressources de substitution, interconnexions, puis, si la pollution s'installe, investissement dans une unité de traitement (dénitrification), dont le coût d'investissement est estimé à [à sourcer : ordre de grandeur pour une collectivité rurale], sans compter les charges de fonctionnement.
+Ces dépassements entraînent des coûts non prévus : distribution d'eau en bouteille aux usagers, recherche de ressources de substitution, interconnexions, puis, si la pollution s'installe, investissement et fonctionnement d'une unité de traitement (dénitrification).
 
-À l'inverse, les actions préventives menées en amont, sur l'aire d'alimentation du captage (accompagnement des agriculteurs, couverts d'interculture, gestion de la fertilisation, maintien des prairies), coûtent nettement moins cher. Mais elles mettent du temps à produire leurs effets, et les moyens d'animation sont limités. **Il faut donc savoir où agir en priorité, et le plus tôt possible.**
+À l'inverse, les actions préventives menées en amont, sur l'aire d'alimentation du captage (accompagnement des agriculteurs, couverts d'interculture, gestion de la fertilisation, maintien des prairies), coûtent nettement moins cher. Une étude de l'Agence de l'eau Seine-Normandie (2026), portant sur 21 aires d'alimentation de captages, estime que traiter une eau polluée par les nitrates et les pesticides coûte **en moyenne 3 fois plus cher** que d'agir à la source, et **environ 13 fois plus cher pour le service d'eau potable** une fois les aides déduites ([source](https://www.banquedesterritoires.fr/pollution-de-leau-le-curatif-trois-fois-plus-couteux-que-le-preventif-selon-une-nouvelle-etude)). Mais elles mettent du temps à produire leurs effets, et les moyens d'animation sont limités. **Il faut donc savoir où agir en priorité, et le plus tôt possible.**
 
 ## Project Objective
 
@@ -25,8 +25,8 @@ Ces dépassements entraînent des coûts non prévus : distribution d'eau en bou
 
 | Élément | Détail |
 |---|---|
-| **Sources** | ADES / Hub'Eau (qualité des eaux souterraines), Registre parcellaire graphique (IGN), notices Telepac (codes cultures), limites communales [à compléter : source] |
-| **Volume** | Analyses de nitrates : [à compléter : nombre de lignes] ; RPG : environ 58 000 parcelles par an |
+| **Sources** | ADES / Hub'Eau (qualité des eaux souterraines), Registre parcellaire graphique (IGN), notices Telepac (codes cultures), limites communales (data.gouv.fr, référentiel administratif) |
+| **Volume** | 7 326 analyses de nitrates sur 712 captages ; après sélection d'un captage de référence par commune, 5 194 analyses retenues (71 %) ; RPG : environ 58 000 parcelles par an |
 | **Période** | Nitrates : 1996 – 2026 ; RPG : 2015 – 2024 |
 | **Variables clés** | Identifiant du captage, date et résultat d'analyse, code commune ; code culture, surface et géométrie de la parcelle |
 | **Limites** | RPG 2019 à 2022 incomplets après import, donc exclus ; 1 à 2 prélèvements par an pour la plupart des captages ; RPG limité aux surfaces déclarées à la PAC |
@@ -47,10 +47,20 @@ Ces dépassements entraînent des coûts non prévus : distribution d'eau en bou
 5. **Croisement** : corrélation de Spearman entre la tendance des nitrates et la tendance des cultures à risque, commune par commune.
 6. **Business interpretation** : traduction des résultats en priorités d'action.
 
+Le détail de la méthode, les compromis sur la qualité des données et les hypothèses posées sont présentés dans [METHODOLOGIE.md](METHODOLOGIE.md).
+
 ## Key Findings
 
 **1. Une partie des captages est en hausse significative.**
-[à compléter : X captages sur Y testés sont en hausse significative, avec une pente médiane de Z mg/L par an.]
+Sur les 122 captages testés (un par commune, au moins 8 années de mesures) :
+
+| Tendance | Captages |
+|---|---|
+| Hausse significative | 21 (17 %) |
+| Baisse significative | 9 (7 %) |
+| Pas de tendance significative | 92 (75 %) |
+
+Les captages en hausse progressent en médiane de **0,27 mg/L par an**, soit environ +2,7 mg/L en dix ans.
 Ce sont ces captages qui risquent de franchir le seuil de 50 mg/L dans les prochaines années, s'ils ne l'ont pas déjà fait.
 
 **2. L'assolement est stable, et quand il évolue, c'est vers moins de risque.**
@@ -100,6 +110,7 @@ Elle fournit une **liste objective et priorisée des captages en dégradation**,
 
 - **Prioriser finement** : croiser la pente des nitrates avec le niveau actuel, la population desservie et l'existence de ressources de substitution, pour obtenir un score de priorité par captage.
 - **Changer d'échelle** : travailler sur les aires d'alimentation de captage (AAC) plutôt que sur les communes.
+- **Comparer les niveaux plutôt que les évolutions** : la part moyenne de cultures à risque d'une commune est-elle liée à son niveau de nitrates ?
 - **Estimer les coûts** : coût de l'animation et des mesures agro-environnementales par captage, comparé au coût d'une unité de traitement.
 - **Automatiser** : mise à jour annuelle des tendances via l'API Hub'Eau, avec un tableau de bord de suivi des captages prioritaires.
 - **Compléter les données** : réimporter les RPG 2019 à 2022, intégrer des données de pratiques et d'hydrogéologie.
@@ -107,4 +118,3 @@ Elle fournit une **liste objective et priorisée des captages en dégradation**,
 ---
 
 *Les scripts R ont été rédigés avec l'aide d'une IA. La question, les choix méthodologiques, la préparation des données en SQL et la validation des résultats sont personnels.*
-
