@@ -1,4 +1,4 @@
-# 📌 Détection des captages en dégradation nitrates et ciblage des actions préventives en Haute-Marne
+# 📌 Détection des captages en dégradation nitrates et ciblage des actions préventives
 
 ## Business Problem
 
